@@ -53,8 +53,19 @@
 	});
 
 	socket = io();
-	socket.on('message', function (timestamp, msg, md5sum) {
-	  console.log(msg);
+	socket.on('message', function () {
+	  var args = Array.prototype.slice.call(arguments);
+	  console.log(args);
+
+	  var N = args.length;
+
+	  var timestamp = args[0];
+	  var md5sum = args[N - 1];
+
+	  if ( md5sum != md5(args.slice(0, N-1).join("")) ) 
+	    throw "MD5 checksum failed";
+
+	  console.log("[Received]", args.slice(1, N-1), "{timestamp: " + timestamp + ", MD5: " + md5sum + "}");
 	});
       });
 
