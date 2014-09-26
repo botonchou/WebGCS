@@ -14,6 +14,8 @@ app.use(bodyParser.urlencoded({ extended: false }))
 
 static_route([
   '/js',
+  '/js/foundation/',
+  '/js/vendor',
   '/css',
   '/vendor/bootstrap-3.2.0-dist/css',
   '/vendor/bootstrap-3.2.0-dist/js'

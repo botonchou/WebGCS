@@ -1,0 +1,52 @@
+body {
+  padding: 0em 1em 0em 1em;
+}
+
+div.rc-label {
+  font-size: 1.1rem;
+  text-transform: uppercase;
+  font-weight: 900;
+}
+
+#msg-to-drone {
+  display: inline;
+  width: 55%;
+} 
+
+#btn-send {
+  width: 33%;
+}
+
+#panel-bottom {
+  position: fixed;
+  bottom: 5px;
+  left: 5%;
+  right: 0;
+  width: 100%;
+}
+
+input {
+  margin: 0 !important;
+}
+
+div.rc-controller {
+  display: -moz-box;              /* Mozilla */
+  display: -webkit-box;           /* WebKit */
+
+  /* Make this box taller than the children, 
+  so there is room for the box-pack */
+
+  /* Children should be oriented vertically */
+  -moz-box-orient: vertical;      /* Mozilla */
+  -webkit-box-orient: vertical;   /* WebKit */
+
+  /* Align children to the horizontal center of this box */
+  -moz-box-align: center;         /* Mozilla */
+  -webkit-box-align: center;      /* WebKit */
+
+  -webkit-box-pack: center;
+
+  /* Make this box wide enough to show 
+  the contents are centered horizontally */
+  width: 300px;           
+}
