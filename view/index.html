@@ -7,12 +7,99 @@
     <link rel="stylesheet" href="vendor/bootstrap-3.2.0-dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="css/foundation.css" />
     <link rel="stylesheet" href="css/app.css" />
+    <script src="js/sprintf.min.js"></script>
     <script src="js/jquery-2.1.1.min.js"></script>
     <script src="js/vendor/modernizr.js"></script>
     <script src="js/md5.min.js"></script>
     <script src="js/vendor/fastclick.js"></script>
     <script src="/socket.io/socket.io.js"></script>
     <script src="js/app.js"></script>
+
+    <style>
+
+      .reading-label {
+	margin-right: 10px;
+      }
+
+      #device-sensors > div{
+	float: left;
+	margin: 20px;
+      }
+
+    </style>
+
+    <script> 
+
+      $(function () {
+
+	window.addEventListener("deviceorientation", onDeviceOrientationEvent, true);
+	window.addEventListener("devicemotion", onDeviceMotionEvent);
+
+      });
+
+      function onDeviceOrientationEvent(event) {
+	// process event.alpha, event.beta and event.gamma
+
+	var alpha = sprintf("%6.3f", event.alpha);
+	var beta  = sprintf("%6.3f", event.beta );
+	var gamma = sprintf("%6.3f", event.gamma);
+
+	if (event.alpha != null) {
+	  $('#alpha .reading').text(alpha);
+	  $('#beta .reading').text(beta);
+	  $('#gamma .reading').text(gamma);
+	}
+      }
+
+      // go see
+      // 1) https://developer.mozilla.org/zh-TW/docs/WebAPI/Detecting_device_orientation
+      // 2) http://w3c.github.io/deviceorientation/spec-source-orientation.html
+
+      function onDeviceMotionEvent(event) {
+	// process event.acceleration and event.accelerationIncludingGravity
+	var x = sprintf("%6.3f", event.acceleration.x);
+	var y = sprintf("%6.3f", event.acceleration.y);
+	var z = sprintf("%6.3f", event.acceleration.z);
+
+	if (event.acceleration.x != null) {
+	  $('#acc-x .reading').text(x);
+	  $('#acc-y .reading').text(y);
+	  $('#acc-z .reading').text(z);
+	}
+      }
+
+      var deg2rad = Math.PI / 180; // Degree-to-Radian conversion
+
+      function compassHeading( alpha, beta, gamma ) {
+
+	var _x = beta  ? beta  * deg2rad : 0; // beta value
+	var _y = gamma ? gamma * deg2rad : 0; // gamma value
+	var _z = alpha ? alpha * deg2rad : 0; // alpha value
+
+	var cX = Math.cos( _x );
+	var cY = Math.cos( _y );
+	var cZ = Math.cos( _z );
+	var sX = Math.sin( _x );
+	var sY = Math.sin( _y );
+	var sZ = Math.sin( _z );
+
+	// Calculate Vx and Vy components
+	var Vx = - cZ * sY - sZ * sX * cY;
+	var Vy = - sZ * sY + cZ * sX * cY;
+
+	// Calculate compass heading
+	var compassHeading = Math.atan( Vx / Vy );
+
+	// Convert compass heading to use whole unit circle
+	if( Vy < 0 )
+	  compassHeading += Math.PI;
+	else if( Vx < 0 )
+	  compassHeading += 2 * Math.PI;
+
+	return compassHeading * ( 180 / Math.PI ); // Compass Heading (in degrees)
+      }
+
+    </script>
   </head>
 
   <body>
@@ -50,6 +137,22 @@
 	  <input type="hidden">
 	</div>
 	<div class="rc-label">Throttle</div>
+      </div>
+
+    </div>
+
+    <div id='device-sensors'>
+
+      <div class='gyro'>
+	<div id='alpha'><span class='reading-label'>&alpha;</span><span class='reading'> -- </span></div>
+	<div id='beta'><span class='reading-label'>&beta;</span><span class='reading'> -- </span></div>
+	<div id='gamma'><span class='reading-label'>&gamma;</span><span class='reading'> -- </span></div>
+      </div>
+
+      <div class='accelerometer'>
+	<div id='acc-x'><span class='reading-label'>x</span><span class='reading'> -- </span></div>
+	<div id='acc-y'><span class='reading-label'>y</span><span class='reading'> -- </span></div>
+	<div id='acc-z'><span class='reading-label'>z</span><span class='reading'> -- </span></div>
       </div>
     </div>
 
