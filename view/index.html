@@ -13,122 +13,14 @@
     <script src="js/md5.min.js"></script>
     <script src="js/vendor/fastclick.js"></script>
     <script src="/socket.io/socket.io.js"></script>
+    <script src="js/virtualjoystick.js"></script>
     <script src="js/app.js"></script>
 
-    <style>
-
-      .reading-label {
-	margin-right: 10px;
-      }
-
-      #device-sensors > div{
-	float: left;
-	margin: 20px;
-      }
-
-    </style>
-
-    <script> 
-
-      $(function () {
-
-	window.addEventListener("deviceorientation", onDeviceOrientationEvent, true);
-	window.addEventListener("devicemotion", onDeviceMotionEvent);
-
-      });
-
-      function onDeviceOrientationEvent(event) {
-	// process event.alpha, event.beta and event.gamma
-
-	var alpha = sprintf("%6.3f", event.alpha);
-	var beta  = sprintf("%6.3f", event.beta );
-	var gamma = sprintf("%6.3f", event.gamma);
-
-	if (event.alpha != null) {
-	  $('#alpha .reading').text(alpha);
-	  $('#beta .reading').text(beta);
-	  $('#gamma .reading').text(gamma);
-	}
-      }
-
-      // go see
-      // 1) https://developer.mozilla.org/zh-TW/docs/WebAPI/Detecting_device_orientation
-      // 2) http://w3c.github.io/deviceorientation/spec-source-orientation.html
-
-      function onDeviceMotionEvent(event) {
-	// process event.acceleration and event.accelerationIncludingGravity
-	var x = sprintf("%6.3f", event.acceleration.x);
-	var y = sprintf("%6.3f", event.acceleration.y);
-	var z = sprintf("%6.3f", event.acceleration.z);
-
-	if (event.acceleration.x != null) {
-	  $('#acc-x .reading').text(x);
-	  $('#acc-y .reading').text(y);
-	  $('#acc-z .reading').text(z);
-	}
-      }
-
-      var deg2rad = Math.PI / 180; // Degree-to-Radian conversion
-
-      function compassHeading( alpha, beta, gamma ) {
-
-	var _x = beta  ? beta  * deg2rad : 0; // beta value
-	var _y = gamma ? gamma * deg2rad : 0; // gamma value
-	var _z = alpha ? alpha * deg2rad : 0; // alpha value
-
-	var cX = Math.cos( _x );
-	var cY = Math.cos( _y );
-	var cZ = Math.cos( _z );
-	var sX = Math.sin( _x );
-	var sY = Math.sin( _y );
-	var sZ = Math.sin( _z );
-
-	// Calculate Vx and Vy components
-	var Vx = - cZ * sY - sZ * sX * cY;
-	var Vy = - sZ * sY + cZ * sX * cY;
-
-	// Calculate compass heading
-	var compassHeading = Math.atan( Vx / Vy );
-
-	// Convert compass heading to use whole unit circle
-	if( Vy < 0 )
-	  compassHeading += Math.PI;
-	else if( Vx < 0 )
-	  compassHeading += 2 * Math.PI;
-
-	return compassHeading * ( 180 / Math.PI ); // Compass Heading (in degrees)
-      }
-
-    </script>
   </head>
 
   <body>
-      <!-- <form class="form-horizontal" role="form">
-	<div id="panel-bottom">
-	  <div class="form-group form-group-lg">
-	    <input id='msg-to-drone' type="text" class="form-control" placeholder="Message to drone">
-	    <button id='btn-send' type="button" class="btn btn-default btn-lg">Send</button>
-	  </div>
-	</div>
-      </form> -->
 
     <div id="rc-panel">
-      <br/>
-      <div class="switch large rc-controller">
-	<div id='label-arm-disarm' class="rc-label">ARM-DISARM</div>
-	<input id="drone-arm-disarm" type="checkbox">
-	<label for="drone-arm-disarm"></label>
-      </div> 
-
-      <!-- <div id="range-slider-roll" class="rc-controller large">
-	<div class="range-slider" data-rc-channel="roll" data-slider>
-	  <span class="range-slider-handle" role="slider" tabindex="0"></span>
-	  <span class="range-slider-active-segment"></span>
-	  <input type="hidden">
-	</div>
-	<div class="rc-label">Roll</div>
-      </div> -->
-      <br/>
 
       <div id="range-slider-throttle" class="rc-controller">
 	<div class="range-slider vertical-range" data-rc-channel="throttle" data-slider data-options="vertical: true; step: 2;">
@@ -139,23 +31,79 @@
 	<div class="rc-label">Throttle</div>
       </div>
 
+      <div>
+	<div class="switch large rc-controller">
+	  <div id='label-arm-disarm' class="rc-label">ARM-DISARM</div>
+	  <input id="drone-arm-disarm" type="checkbox">
+	  <label for="drone-arm-disarm"></label>
+	</div> 
+
+	<br/>
+
+	<div class='FlightMode'>
+	  <div id='label-stablize' class="rc-label">Stablize Mode</div>
+	  <div class="switch small rc-controller">
+	    <input id="FlightMode1" type="radio" checked name="FlightModeGroup">
+	    <label for="FlightMode1"></label>
+	  </div> 
+	  <br/>
+	  <div id='label-auto' class="rc-label">Alt Hold Mode</div>
+	  <div class="switch small rc-controller">
+	    <input id="FlightMode2" type="radio" checked name="FlightModeGroup">
+	    <label for="FlightMode2"></label>
+	  </div> 
+	  <br/>
+	  <div id='label-althold' class="rc-label">Auto Mode</div>
+	  <div class="switch small rc-controller">
+	    <input id="FlightMode3" type="radio" checked name="FlightModeGroup">
+	    <label for="FlightMode3"></label>
+	  </div> 
+	</div>
+      </div>
     </div>
 
-    <div id='device-sensors'>
+    <!-- <div class="icon-bar five-up">
+      <a class="item">
+	<img src="../assets/img/images/fi-home.svg" >
+	<label>Home</label>
+      </a>
+      <a class="item">
+	<img src="../assets/img/images/fi-bookmark.svg" >
+	<label>Bookmark</label>
+      </a>
+      <a class="item">
+	<img src="../assets/img/images/fi-info.svg" >
+	<label>Info</label>
+      </a>
+      <a class="item">
+	<img src="../assets/img/images/fi-mail.svg" >
+	<label>Mail</label>
+      </a>
+      <a class="item">
+	<img src="../assets/img/images/fi-like.svg" >
+	<label>Like</label>
+      </a>
+    </div> -->
 
+    <!-- <div id='device-sensors'>
       <div class='gyro'>
-	<div id='alpha'><span class='reading-label'>&alpha;</span><span class='reading'> -- </span></div>
-	<div id='beta'><span class='reading-label'>&beta;</span><span class='reading'> -- </span></div>
-	<div id='gamma'><span class='reading-label'>&gamma;</span><span class='reading'> -- </span></div>
+	<div id='alpha'><span class='reading-label'>&alpha;</span><span class='reading'> </span></div>
+	<div id='beta'><span class='reading-label'>&beta;</span><span class='reading'> </span></div>
+	<div id='gamma'><span class='reading-label'>&gamma;</span><span class='reading'> </span></div>
       </div>
 
       <div class='accelerometer'>
-	<div id='acc-x'><span class='reading-label'>x</span><span class='reading'> -- </span></div>
-	<div id='acc-y'><span class='reading-label'>y</span><span class='reading'> -- </span></div>
-	<div id='acc-z'><span class='reading-label'>z</span><span class='reading'> -- </span></div>
+	<div id='acc-x'><span class='reading-label'>x</span><span class='reading'> </span></div>
+	<div id='acc-y'><span class='reading-label'>y</span><span class='reading'> </span></div>
+	<div id='acc-z'><span class='reading-label'>z</span><span class='reading'> </span></div>
       </div>
-    </div>
+    </div> -->
 
+    <!-- <div class="garden">
+      <div class="ball"></div>
+    </div> -->
+
+    <div id='gamepad'> </div>
 
     <script src="/js/foundation.min.js"></script>
     <script> $(document).foundation(); </script>

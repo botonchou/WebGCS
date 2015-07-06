@@ -27,7 +27,7 @@ function static_route(dir) {
 
   for (var i=0; i<dir.length; ++i) {
     console.log(INFO + "Using static route: \33[32m" + dir[i] + "\33[0m");
-    app.use(dir[i], express.static(__dirname + '/../' + dir[i]));
+    app.use(dir[i], express.static(__dirname + dir[i]));
   }
 }
 
@@ -54,7 +54,7 @@ app.post('/send', function (req, res) {
 });
 
 app.get('/', function (req, res) {
-  res.sendFile(__dirname + '/../view/index.html');
+  res.sendFile(__dirname + '/view/index.html');
 });
 
 io.on('connection', function(socket) {
@@ -71,7 +71,8 @@ io.on('connection', function(socket) {
     var timestamp = args[0];
     var md5sum = args[args.length - 1];
 
-    console.log(MSG + util.inspect(args.slice(1, args.length - 1), { colors:true }));
+    // console.log(MSG + util.inspect(args.slice(1, args.length - 1), { colors:true }));
+    console.log(MSG + args.slice(1, args.length - 1));
     console.log("\33[1;30m {timestamp: " + timestamp + ", MD5: " + md5sum + "]\33[0m");
 
     args.unshift("message");
