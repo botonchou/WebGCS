@@ -1,86 +1,112 @@
 <!DOCTYPE>
 <html>
   <head>
-    <link rel="stylesheet" href="vendor/bootstrap-3.2.0-dist/css/bootstrap.min.css">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
+    <title>Web GCS</title>
+    <link rel="stylesheet" href="vendor/bootstrap-3.2.0-dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="css/foundation.css" />
+    <link rel="stylesheet" href="css/app.css" />
+    <script src="js/sprintf.min.js"></script>
     <script src="js/jquery-2.1.1.min.js"></script>
+    <script src="js/vendor/modernizr.js"></script>
     <script src="js/md5.min.js"></script>
+    <script src="js/vendor/fastclick.js"></script>
     <script src="/socket.io/socket.io.js"></script>
+    <script src="js/virtualjoystick.js"></script>
+    <script src="js/app.js"></script>
 
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-
-    <style>
-      #msg-to-drone {
-	display: inline;
-	width: 55%;
-      } 
-
-      #btn-send {
-	width: 33%;
-      }
-
-      #panel-bottom {
-	position: fixed;
-	bottom: 5px;
-	left: 5%;
-	right: 0;
-	width: 100%;
-      }
-    </style>
-
-    <script>
-      
-      var socket;
-      $(function () {
-	document.addEventListener("touchstart", function(){}, true);
-
-	$("#btn-send").click(function () {
-	  var msg = $('#msg-to-drone').val();
-	  send(msg);
-	});
-
-	var $armCtrl = $("#drone-arm-disarm");
-	$armCtrl.click(function () {
-	  if ($armCtrl.text() == "ARM") {
-	    send("ARM");
-	    $armCtrl.toggleClass("btn-warning").toggleClass("btn-danger");
-	    $armCtrl.text("DISARM");
-	  }
-	  else {
-	    send("DISARM");
-	    $armCtrl.toggleClass("btn-warning").toggleClass("btn-danger");
-	    $armCtrl.text("ARM");
-	  }
-	});
-
-	socket = io();
-	socket.on('message', function (timestamp, msg, md5sum) {
-	  console.log(msg);
-	});
-      });
-
-      function send(msg) {
-	if (msg.length == 0)
-	  return
-
-	var timestamp = new Date().getTime();
-	socket.emit('message', timestamp, msg, md5(timestamp + msg) );
-      }
-
-    </script>
   </head>
+
   <body>
-    <div class="container">
-      <form class="form-horizontal" role="form">
-	<br/>
-	<button id='drone-arm-disarm' type="button" class="btn btn-danger btn-lg">ARM</button>
-	<br/>
-	<div id="panel-bottom">
-	  <div class="form-group form-group-lg">
-	    <input id='msg-to-drone' type="text" class="form-control" placeholder="Message to drone">
-	    <button id='btn-send' type="button" class="btn btn-default btn-lg">Send</button>
-	  </div>
+
+    <div id="rc-panel">
+
+      <div id="range-slider-throttle" class="rc-controller">
+	<div class="range-slider vertical-range" data-rc-channel="throttle" data-slider data-options="vertical: true; step: 2;">
+	  <span class="range-slider-handle" role="slider" tabindex="0"></span>
+	  <span class="range-slider-active-segment"></span>
+	  <input type="hidden">
 	</div>
-      </form>
+	<div class="rc-label">Throttle</div>
+      </div>
+
+      <div>
+	<div class="switch large rc-controller">
+	  <div id='label-arm-disarm' class="rc-label">ARM-DISARM</div>
+	  <input id="drone-arm-disarm" type="checkbox">
+	  <label for="drone-arm-disarm"></label>
+	</div> 
+
+	<br/>
+
+	<div class='FlightMode'>
+	  <div id='label-stablize' class="rc-label">Stablize Mode</div>
+	  <div class="switch small rc-controller">
+	    <input id="FlightMode1" type="radio" checked name="FlightModeGroup">
+	    <label for="FlightMode1"></label>
+	  </div> 
+	  <br/>
+	  <div id='label-auto' class="rc-label">Alt Hold Mode</div>
+	  <div class="switch small rc-controller">
+	    <input id="FlightMode2" type="radio" checked name="FlightModeGroup">
+	    <label for="FlightMode2"></label>
+	  </div> 
+	  <br/>
+	  <div id='label-althold' class="rc-label">Auto Mode</div>
+	  <div class="switch small rc-controller">
+	    <input id="FlightMode3" type="radio" checked name="FlightModeGroup">
+	    <label for="FlightMode3"></label>
+	  </div> 
+	</div>
+      </div>
     </div>
+
+    <!-- <div class="icon-bar five-up">
+      <a class="item">
+	<img src="../assets/img/images/fi-home.svg" >
+	<label>Home</label>
+      </a>
+      <a class="item">
+	<img src="../assets/img/images/fi-bookmark.svg" >
+	<label>Bookmark</label>
+      </a>
+      <a class="item">
+	<img src="../assets/img/images/fi-info.svg" >
+	<label>Info</label>
+      </a>
+      <a class="item">
+	<img src="../assets/img/images/fi-mail.svg" >
+	<label>Mail</label>
+      </a>
+      <a class="item">
+	<img src="../assets/img/images/fi-like.svg" >
+	<label>Like</label>
+      </a>
+    </div> -->
+
+    <!-- <div id='device-sensors'>
+      <div class='gyro'>
+	<div id='alpha'><span class='reading-label'>&alpha;</span><span class='reading'> </span></div>
+	<div id='beta'><span class='reading-label'>&beta;</span><span class='reading'> </span></div>
+	<div id='gamma'><span class='reading-label'>&gamma;</span><span class='reading'> </span></div>
+      </div>
+
+      <div class='accelerometer'>
+	<div id='acc-x'><span class='reading-label'>x</span><span class='reading'> </span></div>
+	<div id='acc-y'><span class='reading-label'>y</span><span class='reading'> </span></div>
+	<div id='acc-z'><span class='reading-label'>z</span><span class='reading'> </span></div>
+      </div>
+    </div> -->
+
+    <!-- <div class="garden">
+      <div class="ball"></div>
+    </div> -->
+
+    <div id='gamepad'> </div>
+
+    <script src="/js/foundation.min.js"></script>
+    <script> $(document).foundation(); </script>
+
   </body>
 </html>

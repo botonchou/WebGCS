@@ -1,3 +1,4 @@
+var util = require('util');
 var express = require('express');
 var app = require('express')();
 var http = require('http').Server(app);
@@ -13,6 +14,8 @@ app.use(bodyParser.urlencoded({ extended: false }))
 
 static_route([
   '/js',
+  '/js/foundation/',
+  '/js/vendor',
   '/css',
   '/vendor/bootstrap-3.2.0-dist/css',
   '/vendor/bootstrap-3.2.0-dist/js'
@@ -24,7 +27,7 @@ function static_route(dir) {
 
   for (var i=0; i<dir.length; ++i) {
     console.log(INFO + "Using static route: \33[32m" + dir[i] + "\33[0m");
-    app.use(dir[i], express.static(__dirname + '/../' + dir[i]));
+    app.use(dir[i], express.static(__dirname + dir[i]));
   }
 }
 
@@ -51,7 +54,7 @@ app.post('/send', function (req, res) {
 });
 
 app.get('/', function (req, res) {
-  res.sendFile(__dirname + '/../view/index.html');
+  res.sendFile(__dirname + '/view/index.html');
 });
 
 io.on('connection', function(socket) {
@@ -61,9 +64,19 @@ io.on('connection', function(socket) {
   socket.on('disconnect', function(){
     --nUsers;
     console.log(INFO + "a user disconnected \33[1;30m {total: " + nUsers + '}\33[0m');
-  }).on('message', function (uid, msg, md5sum) {
-    console.log(MSG + msg + "\33[1;30m {timestamp: " + uid + ", MD5: " + md5sum + "]\33[0m");
-    socket.broadcast.emit('message', uid, msg, md5sum);
+  }).on('message', function () {
+
+    var args = Array.prototype.slice.call(arguments);
+
+    var timestamp = args[0];
+    var md5sum = args[args.length - 1];
+
+    // console.log(MSG + util.inspect(args.slice(1, args.length - 1), { colors:true }));
+    console.log(MSG + args.slice(1, args.length - 1));
+    console.log("\33[1;30m {timestamp: " + timestamp + ", MD5: " + md5sum + "]\33[0m");
+
+    args.unshift("message");
+    socket.broadcast.emit.apply(this, args);
   });
 });
 
