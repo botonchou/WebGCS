@@ -1,4 +1,5 @@
 var util = require('util');
+var path = require('path');
 var express = require('express');
 var app = require('express')();
 var http = require('http').Server(app);
@@ -9,7 +10,7 @@ const INFO = '\33[34m[Info]\33[0m ';
 const MSG  = '\33[34m[Message]\33[0m ';
 var nUsers = 0;
 
-app.use(express.static(__dirname + '/../view'));
+app.use(express.static(path.join(__dirname + '/../view')));
 app.use(bodyParser.urlencoded({ extended: false }))
 
 static_route([
@@ -18,7 +19,8 @@ static_route([
   '/js/vendor',
   '/css',
   '/vendor/bootstrap-3.2.0-dist/css',
-  '/vendor/bootstrap-3.2.0-dist/js'
+  '/vendor/bootstrap-3.2.0-dist/js',
+  '/vendor'
 ]);
 
 function static_route(dir) {
@@ -27,7 +29,7 @@ function static_route(dir) {
 
   for (var i=0; i<dir.length; ++i) {
     console.log(INFO + "Using static route: \33[32m" + dir[i] + "\33[0m");
-    app.use(dir[i], express.static(__dirname + dir[i]));
+    app.use(dir[i], express.static(path.join(__dirname + dir[i])));
   }
 }
 
