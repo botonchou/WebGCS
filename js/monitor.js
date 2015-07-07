@@ -10,7 +10,7 @@ var t = 0;
 var dps = [], dps2 = [], dps3 = [];
 var chart;
 
-const dataLength = 200; // number of dataPoints visible at any point
+const dataLength = 100; // number of dataPoints visible at any point
 
 function initChart() {
 
@@ -20,12 +20,18 @@ function initChart() {
     },	    
     data: [{
       type: "line",
+      legendText: "Yaw",
+      showInLegend: true,
       dataPoints: dps
     }, {
       type: "line",
+      legendText: "Pitch",
+      showInLegend: true,
       dataPoints: dps2
     }, {
       type: "line",
+      legendText: "Roll",
+      showInLegend: true,
       dataPoints: dps3
     }]
   });
@@ -59,14 +65,10 @@ function draw(data, timestamp) {
   if (!lasttime)
     lasttime = timestamp;
 
-  ['alpha', 'beta', 'gamma'].forEach(function (a) {
-    data[a] = parseFloat(data[a]);
-  });
-
   if (timestamp - lasttime > 20) {
-    dps.push({ x: t, y: data.alpha });
-    dps2.push({ x: t, y: data.beta });
-    dps3.push({ x: t, y: data.gamma });
+    dps.push({ x: t, y: data.yaw });
+    dps2.push({ x: t, y: data.pitch });
+    dps3.push({ x: t, y: data.roll });
 
     t++;
 

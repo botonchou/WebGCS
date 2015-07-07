@@ -2,12 +2,10 @@ var socket;
 var previous_throttle = 0;
 var touchDown = false;
 
+
 $(function () {
 
-  // document.addEventListener("touchstart", function(){}, true);
-
-  /*window.addEventListener("deviceorientation", onDeviceOrientationEvent, true);
-  window.addEventListener("devicemotion", onDeviceMotionEvent);*/
+  initDeviceOrientation();
 
   var $label = $("#label-arm-disarm");
   $("#drone-arm-disarm").click(function () {
@@ -70,6 +68,55 @@ $(function () {
     sendRC();
   }, 1/30 * 1000);
 });
+
+function initDeviceOrientation() {
+  // FULLTILT.DeviceOrientation instance placeholder
+  var deviceOrientation;
+
+  new FULLTILT.getDeviceOrientation({ 'type': 'world' })
+  .then(function(controller) {
+    // Store the returned FULLTILT.DeviceOrientation object
+    deviceOrientation = controller;
+  })
+  .catch(function(message) {
+    console.error(message);
+
+    // Optionally set up fallback controls..., Ex: initManualControls();
+  });
+
+  const cutoff = {
+    roll: 20,
+    pitch: 20,
+    yaw: 150
+  };
+
+  (function draw() {
+
+    if (deviceOrientation) {
+      var raw = deviceOrientation.getLastRawEventData();
+
+      var data = {
+	yaw: parseFloat(raw.alpha), // yaw
+	pitch:  parseFloat(raw.beta),  // pitch
+	roll: parseFloat(raw.gamma)  // roll
+      };
+
+      ["roll", "pitch", "yaw"].forEach(function (x) {
+	data[x] = Math.min(Math.max(data[x], -cutoff[x]), cutoff[x]) / cutoff[x];
+      });
+
+      // send(JSON.stringify(data));
+
+      rc_inputs[RC_CONFIG.ROLL]  = parseInt(RC_CONFIG.PWM_MID_POINT + (data.roll * 0.3) * RC_CONFIG.PWM_RANGE);
+      rc_inputs[RC_CONFIG.PITCH] = parseInt(RC_CONFIG.PWM_MID_POINT + (data.pitch * 0.3) * RC_CONFIG.PWM_RANGE);
+
+      sendRC();
+    }
+
+    requestAnimationFrame(draw);
+
+  })();
+}
 
 const MESSAGE_IDS = {
   ARM_DISARM: 0,
