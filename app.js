@@ -20,7 +20,8 @@ static_route([
   '/css',
   '/vendor/bootstrap-3.2.0-dist/css',
   '/vendor/bootstrap-3.2.0-dist/js',
-  '/vendor'
+  '/vendor',
+  '/bower_components'
 ]);
 
 function static_route(dir) {
@@ -57,6 +58,10 @@ app.post('/send', function (req, res) {
 
 app.get('/', function (req, res) {
   res.sendFile(__dirname + '/view/index.html');
+});
+
+app.get('/monitor', function (req, res) {
+  res.sendFile(__dirname + '/view/monitor.html');
 });
 
 io.on('connection', function(socket) {

@@ -111,6 +111,14 @@ function start_socket_io() {
     var N = args.length;
     var timestamp = args[0];
     console.log("[Received]", args.slice(1, N), "{timestamp: " + timestamp + "}");
+
+    var msgs = JSON.parse(args.slice(1, N));
+    if (window.series) {
+      if (timestamp - window.lasttime > 1000) {
+	window.series.addPoint([(new Date(timestamp)).getTime(), msgs.x], true, true);
+      }
+      window.lasttime = timestamp;
+    }
   });
 }
 
@@ -128,7 +136,6 @@ function send() {
   msgs.unshift(timestamp);
   msgs.unshift('message');
 
-  console.log(msgs);
   socket.emit.apply(socket, msgs);
 }
 
