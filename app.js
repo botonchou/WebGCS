@@ -61,7 +61,7 @@ app.get('/', function (req, res) {
 
 io.on('connection', function(socket) {
   ++nUsers;
-  console.log(INFO + "new user connected \33[1;30m {total: " + nUsers + '}\33[0m');
+  console.log(INFO + "new user connected \33[32m {total: " + nUsers + '}\33[0m');
 
   socket.on('disconnect', function(){
     --nUsers;
@@ -71,11 +71,8 @@ io.on('connection', function(socket) {
     var args = Array.prototype.slice.call(arguments);
 
     var timestamp = args[0];
-    var md5sum = args[args.length - 1];
 
-    // console.log(MSG + util.inspect(args.slice(1, args.length - 1), { colors:true }));
-    console.log(MSG + args.slice(1, args.length - 1));
-    console.log("\33[1;30m {timestamp: " + timestamp + ", MD5: " + md5sum + "]\33[0m");
+    console.log(MSG + args.slice(1, args.length) + "\33[1;30m [timestamp: " + timestamp + "]\33[0m");
 
     args.unshift("message");
     socket.broadcast.emit.apply(this, args);
